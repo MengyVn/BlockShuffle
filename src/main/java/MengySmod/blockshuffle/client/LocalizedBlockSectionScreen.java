@@ -30,7 +30,8 @@ import java.util.Set;
 public final class LocalizedBlockSectionScreen extends ConfigurationScreen.ConfigurationSectionScreen {
 
     /** 需要显示方块名的列表配置项（与 ShuffleConfig 中的键名一致）。 */
-    private static final Set<String> BLOCK_LISTS = Set.of("blockBlacklist", "blockWeights");
+    private static final Set<String> BLOCK_LISTS = Set.of(
+            "blockBlacklist", "blockWeights", "blockParticipationChance");
 
     /**
      * NeoForge 把这两个翻译键声明为 private 常量，这里按字面量复刻，保证按钮外观与其它模组一致：
@@ -85,7 +86,7 @@ public final class LocalizedBlockSectionScreen extends ConfigurationScreen.Confi
         protected AbstractWidget createListLabel(int idx) {
             Object entry = idx >= 0 && idx < cfgList.size() ? cfgList.get(idx) : null;
             return new ListLabelWidget(0, 0, Button.DEFAULT_WIDTH, Button.DEFAULT_HEIGHT,
-                    BlockNameFormatter.displayName(entry), idx);
+                    BlockNameFormatter.displayName(entry, key), idx);
         }
     }
 }

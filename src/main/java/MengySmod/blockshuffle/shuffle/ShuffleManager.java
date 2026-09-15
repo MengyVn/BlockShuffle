@@ -174,6 +174,24 @@ public final class ShuffleManager {
                         ? "不限制"
                         : values.dropEntityLimit() + " 个 / " + values.dropWatchSeconds() + " 秒窗口")
                 .append('\n');
+        builder.append("必然参与: ");
+        if (values.blockParticipationChance().isEmpty()) {
+            builder.append("未配置（完全随机）");
+        } else {
+            boolean first = true;
+            for (it.unimi.dsi.fastutil.objects.Object2DoubleMap.Entry<net.minecraft.world.level.block.Block> entry
+                    : values.blockParticipationChance().object2DoubleEntrySet()) {
+                if (!first) {
+                    builder.append(", ");
+                }
+                builder.append(entry.getKey().getName().getString())
+                        .append(' ')
+                        .append(Math.round(entry.getDoubleValue() * 1000.0D) / 10.0D)
+                        .append('%');
+                first = false;
+            }
+        }
+        builder.append('\n');
         builder.append("互换提示: ").append(values.messageMode().name())
                 .append(" / ").append(values.messageScope().name()).append('\n');
         builder.append("累计互换次数: ").append(totalShuffles).append('\n');

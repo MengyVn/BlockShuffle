@@ -53,6 +53,11 @@ final class RegionCursor {
         return chunkOrder.size();
     }
 
+    /** 区域内的区块遍历顺序（由近到远），采样选型阶段复用同一份顺序。 */
+    static List<Long> chunkOrder(BlockPos center, int radiusChunks) {
+        return buildOrder(center.getX() >> 4, center.getZ() >> 4, radiusChunks);
+    }
+
     private static List<Long> buildOrder(int centerChunkX, int centerChunkZ, int radius) {
         List<int[]> offsets = new ArrayList<>((2 * radius + 1) * (2 * radius + 1));
         for (int dx = -radius; dx <= radius; dx++) {

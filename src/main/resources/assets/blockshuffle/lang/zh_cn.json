@@ -21,6 +21,12 @@
   "blockshuffle.configuration.blockWeights": "方块权重",
   "blockshuffle.configuration.blockWeights.button": "编辑列表",
   "blockshuffle.configuration.blockWeights.tooltip": "手动指定方块被抽中的权重，格式 \"minecraft:stone=3.0\"（省略 =1.0）。未列出的方块权重为 1.0，权重 0 表示永不被抽中。权重只影响抽取概率，不影响互换范围。",
+  "blockshuffle.configuration.blockParticipationChance": "必然参与互换的概率",
+  "blockshuffle.configuration.blockParticipationChance.button": "编辑列表",
+  "blockshuffle.configuration.blockParticipationChance.tooltip": "指定方块「必然参与互换」的概率，格式 \"minecraft:diamond_ore=100\"（按百分比 0~100，也可写 100%）。设为 100 时每受伤一次该方块必定参与，另一方仍随机。留空表示不使用本功能。注意与「方块权重」的区别：权重只调整被抽中的相对可能性，无法保证必然参与。",
+  "blockshuffle.configuration.chanceEntry": "%s（参与概率 %s）",
+  "blockshuffle.configuration.fluidsOnlyWithSolidBlocks": "流体只与实心方块互换",
+  "blockshuffle.configuration.fluidsOnlyWithSolidBlocks.tooltip": "开启后：水/岩浆不会与水/岩浆互换，也不会与火把、花、草、海带、作物等「徒手瞬间破坏」（硬度 0）的方块互换——这些方块在流体里无法存留，换过去往往会立刻掉落或消失。默认关闭。",
   "blockshuffle.configuration.unknownBlock": "未知方块：%s",
   "blockshuffle.configuration.weightedEntry": "%s（权重 %s）",
   "blockshuffle.configuration.swapMessageMode": "互换提示方式",
@@ -40,6 +46,10 @@
   "blockshuffle.configuration.dropWatchSeconds": "掉落物观察窗口（秒）",
   "blockshuffle.configuration.dropWatchSeconds.tooltip": "互换之后掉落物上限保持生效的时长。树叶腐烂、沙子下落、植物脱落大多发生在互换之后，因此限制只在窗口内生效。",
   "blockshuffle.message.swapped": "%s ⇄ %s",
+  "blockshuffle.message.forcedSkipped": "[BlockShuffle] %s 的组合超出安全阀（%s 格），本次改为随机互换",
   "blockshuffle.message.skipped": "[BlockShuffle] 本次未互换：%s",
-  "blockshuffle.command.triggered": "[BlockShuffle] 已强制触发一次互换。"
+  "blockshuffle.command.triggered": "[BlockShuffle] 已强制触发一次互换。",
+  "blockshuffle.message.welcome.title": "【BlockShuffle】玩家每受伤一次，附近两种方块会随机整体互换！",
+  "blockshuffle.message.welcome.help": "受伤后屏幕/聊天栏会提示换掉了什么；/blockshuffle status 查看设置，/blockshuffle trigger 手动触发测试。",
+  "blockshuffle.message.welcome.author": "作者：Mengy    联系：2274473985@qq.com"
 }

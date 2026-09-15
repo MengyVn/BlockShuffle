@@ -1,6 +1,7 @@
 package MengySmod.blockshuffle.shuffle;
 
 import MengySmod.blockshuffle.config.ShuffleConfig;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.Property;
@@ -39,6 +40,50 @@ public final class SwapHelper {
             return false;
         }
         return true;
+    }
+
+    /**
+     * 这对组合是否允许互换。
+     *
+     * <p>配置项 {@code fluidsOnlyWithSolidBlocks} 打开时，流体只能与"实心方块"互换：
+     * 流体不与流体配对，也不与火把、花草、作物这类徒手瞬间破坏的方块配对
+     * （它们无法在流体中存留，换过去往往立刻掉落或消失）。
+     */
+    public static boolean isPairAllowed(Block a, Block b, ShuffleConfig.Values values) {
+        if (!values.fluidsOnlyWithSolidBlocks()) {
+            return true;
+        }
+        boolean aFluid = isFluidBlock(a);
+        boolean bFluid = isFluidBlock(b);
+        if (aFluid && bFluid) {
+            return false;
+        }
+        if (aFluid) {
+            return isSolidBlock(b);
+        }
+        if (bFluid) {
+            return isSolidBlock(a);
+        }
+        return true;
+    }
+
+    /** 是否是流体方块（水/岩浆的源头与流动形态都是 {@link LiquidBlock}）。 */
+    public static boolean isFluidBlock(Block block) {
+        return block instanceof LiquidBlock;
+    }
+
+    /**
+     * 「可被直接破坏掉落的物品」：硬度为 0、徒手瞬间破坏的方块（火把、花、草、海带、作物、红石线等）。
+     *
+     * <p>{@code getDestroySpeed} 在 1.21 里只返回方块自身的硬度字段，不会使用传入的 level/pos
+     * （已核实原版没有任何方块重写它），因此这里传 null 是安全的。
+     */
+    public static boolean isInstantlyBreakable(BlockState state) {
+        return state.getDestroySpeed(null, null) <= 0.0F;
+    }
+
+    private static boolean isSolidBlock(Block block) {
+        return !isInstantlyBreakable(block.defaultBlockState());
     }
 
     /**

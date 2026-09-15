@@ -15,14 +15,19 @@ import net.minecraft.world.level.block.Block;
  */
 final class BlockNameFormatter {
 
+    /** 这些列表里的 {@code =} 后面是百分比而不是权重 */
+    private static final java.util.Set<String> CHANCE_LISTS = java.util.Set.of("blockParticipationChance");
+
     private BlockNameFormatter() {
     }
 
     /**
-     * @param rawEntry 配置里的原始条目，例如 {@code "minecraft:obsidian"} 或权重形式 {@code "minecraft:stone=3.0"}
+     * @param rawEntry 配置里的原始条目，例如 {@code "minecraft:obsidian"}、{@code "minecraft:stone=3.0"}
+     *                 或参与概率 {@code "minecraft:diamond_ore=100%"}
+     * @param listKey  该条目所属的配置项名，用于决定后缀显示"权重"还是"参与概率"
      * @return 展示用组件：已知方块显示本地化名称，未知条目显示红色原文
      */
-    static Component displayName(Object rawEntry) {
+    static Component displayName(Object rawEntry, String listKey) {
         if (!(rawEntry instanceof String text)) {
             return Component.literal(String.valueOf(rawEntry));
         }
@@ -45,7 +50,20 @@ final class BlockNameFormatter {
         if (weightPart == null || weightPart.isEmpty()) {
             return name;
         }
+        if (CHANCE_LISTS.contains(listKey)) {
+            return Component.translatable("blockshuffle.configuration.chanceEntry", name, normalizePercent(weightPart));
+        }
         return Component.translatable("blockshuffle.configuration.weightedEntry", name, weightPart);
+    }
+
+    /** 参与概率列表里的值统一按百分比显示（"100" 与 "100%" 都显示成 "100%"）。 */
+    private static String normalizePercent(String raw) {
+        try {
+            double percent = Double.parseDouble(raw.trim().replace("%", ""));
+            return (Math.round(percent * 10.0D) / 10.0D) + "%";
+        } catch (NumberFormatException e) {
+            return raw;
+        }
     }
 
     private static Block blockById(String id) {

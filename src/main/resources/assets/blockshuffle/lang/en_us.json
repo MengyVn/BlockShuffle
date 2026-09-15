@@ -21,6 +21,12 @@
   "blockshuffle.configuration.blockWeights": "Block Weights",
   "blockshuffle.configuration.blockWeights.button": "Edit list",
   "blockshuffle.configuration.blockWeights.tooltip": "Manual pick weight per block, format \"minecraft:stone=3.0\" (=1.0 when omitted). Unlisted blocks use 1.0; weight 0 means the block is never picked. Weight only affects which types get picked, not how many blocks are swapped.",
+  "blockshuffle.configuration.blockParticipationChance": "Guaranteed Participation Chance",
+  "blockshuffle.configuration.blockParticipationChance.button": "Edit list",
+  "blockshuffle.configuration.blockParticipationChance.tooltip": "Chance (in percent, 0-100, \"100%\" also accepted) that a block is guaranteed to take part in each swap, e.g. \"minecraft:diamond_ore=100\". At 100 the block is always one side of the swap and the other side stays random. Empty means the feature is off. Note: this differs from Block Weights, which only biases the random pick and cannot guarantee participation.",
+  "blockshuffle.configuration.chanceEntry": "%s (chance %s)",
+  "blockshuffle.configuration.fluidsOnlyWithSolidBlocks": "Fluids Only Swap With Solid Blocks",
+  "blockshuffle.configuration.fluidsOnlyWithSolidBlocks.tooltip": "When enabled, water/lava only swaps with solid blocks: never with another fluid, and never with instantly breakable (hardness 0) blocks such as torches, flowers, grass, kelp or crops, which cannot survive inside a fluid and would immediately drop or vanish. Default: off.",
   "blockshuffle.configuration.unknownBlock": "Unknown block: %s",
   "blockshuffle.configuration.weightedEntry": "%s (weight %s)",
   "blockshuffle.configuration.swapMessageMode": "Swap Message Style",
@@ -40,6 +46,10 @@
   "blockshuffle.configuration.dropWatchSeconds": "Drop Watch Window (seconds)",
   "blockshuffle.configuration.dropWatchSeconds.tooltip": "How long the dropped item limit stays active after a swap. Leaf decay, falling sand and plant drops happen after the swap itself, so the limit only applies inside this window.",
   "blockshuffle.message.swapped": "%s ⇄ %s",
+  "blockshuffle.message.forcedSkipped": "[BlockShuffle] %s would exceed the block limit (%s blocks); a random swap was used instead",
   "blockshuffle.message.skipped": "[BlockShuffle] Swap skipped: %s",
-  "blockshuffle.command.triggered": "[BlockShuffle] Force-triggered one swap."
+  "blockshuffle.command.triggered": "[BlockShuffle] Force-triggered one swap.",
+  "blockshuffle.message.welcome.title": "[BlockShuffle] Every time a player is hurt, two nearby block types swap!",
+  "blockshuffle.message.welcome.help": "The swapped blocks are shown on screen / in chat when you get hurt. Use /blockshuffle status for settings and /blockshuffle trigger to test manually.",
+  "blockshuffle.message.welcome.author": "Author: Mengy    Contact: 2274473985@qq.com"
 }

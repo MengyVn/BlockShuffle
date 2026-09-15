@@ -81,6 +81,14 @@ public final class ShuffleConfig {
                     "（不会去拦截 FallingBlockEntity 本身——那等于让方块凭空消失。）")
             .define("keepPlantsAttached", true);
 
+    private static final ModConfigSpec.BooleanValue FLUIDS_ONLY_WITH_SOLID_BLOCKS = BUILDER
+            .comment("流体（水/岩浆）只与实心方块互换。",
+                    "开启后：流体不会与水/岩浆互换，也不会与火把、花草、作物这类\"徒手瞬间破坏\"的方块",
+                    "（硬度为 0，例如火把、花、草、海带、红石线）互换——",
+                    "这些方块在流体里无法存留，换过去往往立刻掉落或消失。",
+                    "默认关闭（保持旧的\"流体可与任何方块互换\"行为）。")
+            .define("fluidsOnlyWithSolidBlocks", false);
+
     private static final ModConfigSpec.ConfigValue<List<? extends String>> BLOCK_BLACKLIST = BUILDER
             .comment("黑名单方块，永不参与互换（候选与目标都会被排除）。",
                     "默认排除基岩、传送门、屏障、命令方块、结构方块、刷怪笼等会破坏存档或玩法平衡的方块。",
@@ -103,7 +111,35 @@ public final class ShuffleConfig {
                     "minecraft:trial_spawner",
                     "minecraft:vault",
                     "minecraft:moving_piston",
-                    "minecraft:piston_head"), () -> "minecraft:bedrock", ShuffleConfig::validateBlockId);
+                    "minecraft:piston_head",
+                    // 所有"会坠落"的方块（沙子/沙砾/混凝土粉末/铁砧/龙蛋/可疑沙砾等）：
+                    // 互换后它们会成片下落，既卡顿又会让地形塌陷，默认一律不参与
+                    "minecraft:sand",
+                    "minecraft:red_sand",
+                    "minecraft:gravel",
+                    "minecraft:suspicious_sand",
+                    "minecraft:suspicious_gravel",
+                    "minecraft:anvil",
+                    "minecraft:chipped_anvil",
+                    "minecraft:damaged_anvil",
+                    "minecraft:dragon_egg",
+                    "minecraft:pointed_dripstone",
+                    "minecraft:white_concrete_powder",
+                    "minecraft:orange_concrete_powder",
+                    "minecraft:magenta_concrete_powder",
+                    "minecraft:light_blue_concrete_powder",
+                    "minecraft:yellow_concrete_powder",
+                    "minecraft:lime_concrete_powder",
+                    "minecraft:pink_concrete_powder",
+                    "minecraft:gray_concrete_powder",
+                    "minecraft:light_gray_concrete_powder",
+                    "minecraft:cyan_concrete_powder",
+                    "minecraft:purple_concrete_powder",
+                    "minecraft:blue_concrete_powder",
+                    "minecraft:brown_concrete_powder",
+                    "minecraft:green_concrete_powder",
+                    "minecraft:red_concrete_powder",
+                    "minecraft:black_concrete_powder"), () -> "minecraft:bedrock", ShuffleConfig::validateBlockId);
 
     private static final ModConfigSpec.ConfigValue<List<? extends String>> DIMENSIONS = BUILDER
             .comment("生效的维度列表，例如 [\"minecraft:overworld\", \"minecraft:the_nether\"]。",
@@ -131,6 +167,18 @@ public final class ShuffleConfig {
                     "TRIGGERER = 只有受伤的玩家（触发者始终能看到，不受此项影响），",
                     "REGION = 受影响范围内的玩家，DIMENSION = 该维度所有玩家，ALL = 全服所有玩家。")
             .defineEnum("swapMessageScope", MessageScope.REGION);
+
+    // --------------------------------------------------------- 必然参与的概率
+
+    private static final ModConfigSpec.ConfigValue<List<? extends String>> BLOCK_PARTICIPATION_CHANCE = BUILDER
+            .comment("指定方块\"必然参与互换\"的概率，格式 \"minecraft:diamond_ore=100\"（按百分比 0~100，也可写成 100%）。",
+                    "例如设为 100 时：玩家每受伤一次，钻石矿石必定成为互换的一方，另一方仍是随机抽取的方块。",
+                    "命中 2 个及以上时，从命中者里随机取 2 个；只命中 1 个时，另一方按 blockWeights 随机抽取。",
+                    "方块必须真的出现在受影响范围内才会参与（不存在就自动忽略），并同样受空气/黑名单/方块实体规则约束。",
+                    "留空（默认）表示不使用本功能，此时完全随机抽取。",
+                    "与 blockWeights 的区别：blockWeights 只调整\"被抽中的相对可能性\"，无法保证必然参与；本项才是必然参与的概率。")
+            .defineListAllowEmpty("blockParticipationChance", List.of(),
+                    () -> "minecraft:diamond_ore=100", ShuffleConfig::validateChanceEntry);
 
     // ------------------------------------------------------------- 掉落物上限
 
@@ -188,9 +236,11 @@ public final class ShuffleConfig {
                          int typePickRetries,
                          boolean fluidsParticipate,
                          boolean keepPlantsAttached,
+                         boolean fluidsOnlyWithSolidBlocks,
                          Set<ResourceLocation> dimensions,
                          boolean allDimensions,
                          Object2DoubleMap<Block> blockWeights,
+                         Object2DoubleMap<Block> blockParticipationChance,
                          Set<Block> blockBlacklist,
                          int dropEntityLimit,
                          double dropWatchSeconds,
@@ -213,8 +263,9 @@ public final class ShuffleConfig {
     }
 
     private static Values defaults() {
-        return new Values(6, 5.0D, 6000, 500000, 8, true, true,
-                Set.of(), true, new Object2DoubleOpenHashMap<>(), Set.of(), 100, 15.0D,
+        return new Values(6, 5.0D, 6000, 500000, 8, true, true, false,
+                Set.of(), true, new Object2DoubleOpenHashMap<>(), new Object2DoubleOpenHashMap<>(),
+                Set.of(), 100, 15.0D,
                 MessageMode.CHAT, MessageScope.REGION);
     }
 
@@ -255,6 +306,26 @@ public final class ShuffleConfig {
             weights.put(block, Math.max(0.0D, weight));
         }
 
+        Object2DoubleMap<Block> chances = new Object2DoubleOpenHashMap<>();
+        for (String entry : BLOCK_PARTICIPATION_CHANCE.get()) {
+            String[] parts = entry.split("=", 2);
+            Block block = blockById(parts[0].trim());
+            if (block == null) {
+                Blockshuffle.LOGGER.warn("[BlockShuffle] 未知的参与概率方块: {}", entry);
+                continue;
+            }
+            double percent = 100.0D;
+            if (parts.length == 2) {
+                try {
+                    percent = Double.parseDouble(parts[1].trim().replace("%", ""));
+                } catch (NumberFormatException ignored) {
+                    Blockshuffle.LOGGER.warn("[BlockShuffle] 无法解析参与概率: {}", entry);
+                    continue;
+                }
+            }
+            chances.put(block, Math.min(1.0D, Math.max(0.0D, percent / 100.0D)));
+        }
+
         Set<Block> blacklist = new LinkedHashSet<>();
         for (String entry : BLOCK_BLACKLIST.get()) {
             Block block = blockById(entry.trim());
@@ -289,14 +360,20 @@ public final class ShuffleConfig {
                 TYPE_PICK_RETRIES.get(),
                 FLUIDS_PARTICIPATE.get(),
                 KEEP_PLANTS_ATTACHED.get(),
+                FLUIDS_ONLY_WITH_SOLID_BLOCKS.get(),
                 Set.copyOf(dimensions),
                 all,
                 weights,
+                chances,
                 Set.copyOf(blacklist),
                 DROP_ENTITY_LIMIT.get(),
                 DROP_WATCH_SECONDS.get(),
                 SWAP_MESSAGE_MODE.get(),
                 SWAP_MESSAGE_SCOPE.get());
+
+        if (!chances.isEmpty()) {
+            Blockshuffle.LOGGER.info("[BlockShuffle] 已配置 {} 个「必然参与互换」的方块", chances.size());
+        }
 
         Blockshuffle.LOGGER.info("[BlockShuffle] 配置已加载：半径 {} 区块，冷却 {} 秒，每 tick {} 格，安全阀 {}，提示 {} / {}",
                 values.radiusChunks(), values.cooldownSeconds(), values.blocksPerTick(),
@@ -325,6 +402,25 @@ public final class ShuffleConfig {
         }
         String trimmed = id.trim();
         return trimmed.equals("*") || ResourceLocation.tryParse(trimmed) != null;
+    }
+
+    private static boolean validateChanceEntry(Object obj) {
+        if (!(obj instanceof String entry)) {
+            return false;
+        }
+        String[] parts = entry.split("=", 2);
+        if (ResourceLocation.tryParse(parts[0].trim()) == null) {
+            return false;
+        }
+        if (parts.length == 2) {
+            try {
+                double percent = Double.parseDouble(parts[1].trim().replace("%", ""));
+                return percent >= 0.0D && percent <= 100.0D;
+            } catch (NumberFormatException e) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private static boolean validateWeightEntry(Object obj) {
