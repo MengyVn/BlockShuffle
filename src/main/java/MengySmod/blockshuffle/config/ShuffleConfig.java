@@ -76,13 +76,10 @@ public final class ShuffleConfig {
             .comment("保持植物/下落方块不因本次互换而脱落。",
                     "开启时互换使用 UPDATE_KNOWN_SHAPE，不触发邻居与形状更新：",
                     "花、草、海带、沙子等会保持原样（可能悬空），同时大幅减少掉落物。",
-                    "关闭则按原版规则级联更新（掉落物多、开销大，不建议）。")
+                    "「石头变沙子后大面积下落」这个风险也由本项抑制：",
+                    "互换时用 UPDATE_KNOWN_SHAPE 不让它们立刻开始下落。",
+                    "（不会去拦截 FallingBlockEntity 本身——那等于让方块凭空消失。）")
             .define("keepPlantsAttached", true);
-
-    private static final ModConfigSpec.BooleanValue HANDLE_FALLING_BLOCKS = BUILDER
-            .comment("是否在观察窗口内限制下落方块实体（FallingBlockEntity）的数量。",
-                    "石头变成沙子后可能大面积下落，同样会导致卡顿。")
-            .define("handleFallingBlocks", true);
 
     private static final ModConfigSpec.ConfigValue<List<? extends String>> BLOCK_BLACKLIST = BUILDER
             .comment("黑名单方块，永不参与互换（候选与目标都会被排除）。",
@@ -191,7 +188,6 @@ public final class ShuffleConfig {
                          int typePickRetries,
                          boolean fluidsParticipate,
                          boolean keepPlantsAttached,
-                         boolean handleFallingBlocks,
                          Set<ResourceLocation> dimensions,
                          boolean allDimensions,
                          Object2DoubleMap<Block> blockWeights,
@@ -217,7 +213,7 @@ public final class ShuffleConfig {
     }
 
     private static Values defaults() {
-        return new Values(6, 5.0D, 6000, 500000, 8, true, true, true,
+        return new Values(6, 5.0D, 6000, 500000, 8, true, true,
                 Set.of(), true, new Object2DoubleOpenHashMap<>(), Set.of(), 100, 15.0D,
                 MessageMode.CHAT, MessageScope.REGION);
     }
@@ -293,7 +289,6 @@ public final class ShuffleConfig {
                 TYPE_PICK_RETRIES.get(),
                 FLUIDS_PARTICIPATE.get(),
                 KEEP_PLANTS_ATTACHED.get(),
-                HANDLE_FALLING_BLOCKS.get(),
                 Set.copyOf(dimensions),
                 all,
                 weights,

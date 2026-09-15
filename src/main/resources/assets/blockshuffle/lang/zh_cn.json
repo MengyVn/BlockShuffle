@@ -13,8 +13,6 @@
   "blockshuffle.configuration.fluidsParticipate.tooltip": "水与岩浆是否参与互换。互换会抑制邻居更新，但岩浆源之后仍可能流动并与水发生反应。",
   "blockshuffle.configuration.keepPlantsAttached": "保持植物不脱落",
   "blockshuffle.configuration.keepPlantsAttached.tooltip": "互换时不触发邻居与形状更新：花、草、海带、沙子会保持原位（可能悬空），掉落物大幅减少。关闭则按原版规则级联更新：掉落物很多且开销巨大。",
-  "blockshuffle.configuration.handleFallingBlocks": "限制下落方块",
-  "blockshuffle.configuration.handleFallingBlocks.tooltip": "在观察窗口内同时限制下落方块实体数量（石头变成沙子后可能大面积下落）。",
   "blockshuffle.configuration.blockBlacklist": "方块黑名单",
   "blockshuffle.configuration.blockBlacklist.button": "编辑列表",
   "blockshuffle.configuration.blockBlacklist.tooltip": "永不参与互换的方块（既不做候选也不做目标）。空气与方块实体（箱子、告示牌、熔炉等）始终被排除，无需在此列出。",

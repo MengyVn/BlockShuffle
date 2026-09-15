@@ -13,8 +13,6 @@
   "blockshuffle.configuration.fluidsParticipate.tooltip": "Whether water and lava take part in the swap. Neighbor updates are suppressed, but lava may still flow afterwards and react with water.",
   "blockshuffle.configuration.keepPlantsAttached": "Keep Plants Attached",
   "blockshuffle.configuration.keepPlantsAttached.tooltip": "Swap without triggering neighbor/shape updates, so flowers, grass, kelp and sand stay in place (possibly floating) and far fewer item drops are created. Turning this off follows vanilla cascading updates: many drops and heavy lag.",
-  "blockshuffle.configuration.handleFallingBlocks": "Limit Falling Blocks",
-  "blockshuffle.configuration.handleFallingBlocks.tooltip": "Also cap falling block entities during the watch window, since stone turning into sand can cause mass falling.",
   "blockshuffle.configuration.blockBlacklist": "Block Blacklist",
   "blockshuffle.configuration.blockBlacklist.button": "Edit list",
   "blockshuffle.configuration.blockBlacklist.tooltip": "Blocks that never take part in a swap (neither as candidate nor as target). Air and block entities (chests, signs, furnaces...) are always excluded and do not need to be listed.",
