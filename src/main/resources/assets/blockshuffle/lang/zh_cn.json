@@ -50,6 +50,11 @@
   "blockshuffle.message.skipped": "[BlockShuffle] 本次未互换：%s",
   "blockshuffle.command.triggered": "[BlockShuffle] 已强制触发一次互换。",
   "blockshuffle.message.welcome.title": "【BlockShuffle】玩家每受伤一次，附近两种方块会随机整体互换！",
-  "blockshuffle.message.welcome.help": "受伤后屏幕/聊天栏会提示换掉了什么；/blockshuffle status 查看设置，/blockshuffle trigger 手动触发测试。",
-  "blockshuffle.message.welcome.author": "作者：Mengy    联系：2274473985@qq.com"
+  "blockshuffle.message.welcome.help": "受伤后屏幕/聊天栏会提示换掉了什么；/blockshuffle status 查看设置，/blockshuffle trigger 手动触发测试，/blockshuffle off 一键关闭。",
+  "blockshuffle.message.welcome.author": "作者：Mengy    联系：2274473985@qq.com",
+  "blockshuffle.configuration.enabled": "模组总开关",
+  "blockshuffle.configuration.enabled.tooltip": "关闭后：受伤不再触发互换、手动触发被忽略、进行中的互换会被中止。游戏内可用 /blockshuffle off 一键关闭、/blockshuffle on 重新开启（会写入本配置文件）。",
+  "blockshuffle.command.enabled": "[BlockShuffle] 已开启",
+  "blockshuffle.command.disabled": "[BlockShuffle] 已关闭（进行中的互换已中止）",
+  "blockshuffle.message.disabled": "[BlockShuffle] 模组当前已关闭，可用 /blockshuffle on 开启"
 }

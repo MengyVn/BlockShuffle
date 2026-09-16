@@ -35,6 +35,12 @@ public final class ShuffleConfig {
 
     // ------------------------------------------------------------------ 玩法
 
+    private static final ModConfigSpec.BooleanValue ENABLED = BUILDER
+            .comment("模组总开关。",
+                    "关闭后：受伤不再触发互换、手动触发也会被忽略、进行中的互换会被中止。",
+                    "游戏内可用 /blockshuffle off 一键关闭、/blockshuffle on 重新开启（会写入本配置文件）。")
+            .define("enabled", true);
+
     private static final ModConfigSpec.IntValue RADIUS_CHUNKS = BUILDER
             .comment("影响半径，单位为区块（以玩家所在区块为中心的正方形区域）。",
                     "默认 6，上限 32。",
@@ -139,7 +145,27 @@ public final class ShuffleConfig {
                     "minecraft:brown_concrete_powder",
                     "minecraft:green_concrete_powder",
                     "minecraft:red_concrete_powder",
-                    "minecraft:black_concrete_powder"), () -> "minecraft:bedrock", ShuffleConfig::validateBlockId);
+                    "minecraft:black_concrete_powder",
+                    // 地毯类（16 色羊毛地毯 + 苔藓地毯）与雪层：贴地薄方块，支撑方块被换掉后会脱落，
+                    // 既产生大量掉落物，也会让建筑"掉一地"
+                    "minecraft:white_carpet",
+                    "minecraft:orange_carpet",
+                    "minecraft:magenta_carpet",
+                    "minecraft:light_blue_carpet",
+                    "minecraft:yellow_carpet",
+                    "minecraft:lime_carpet",
+                    "minecraft:pink_carpet",
+                    "minecraft:gray_carpet",
+                    "minecraft:light_gray_carpet",
+                    "minecraft:cyan_carpet",
+                    "minecraft:purple_carpet",
+                    "minecraft:blue_carpet",
+                    "minecraft:brown_carpet",
+                    "minecraft:green_carpet",
+                    "minecraft:red_carpet",
+                    "minecraft:black_carpet",
+                    "minecraft:moss_carpet",
+                    "minecraft:snow"), () -> "minecraft:bedrock", ShuffleConfig::validateBlockId);
 
     private static final ModConfigSpec.ConfigValue<List<? extends String>> DIMENSIONS = BUILDER
             .comment("生效的维度列表，例如 [\"minecraft:overworld\", \"minecraft:the_nether\"]。",
@@ -229,7 +255,8 @@ public final class ShuffleConfig {
     /**
      * 运行期使用的不可变配置快照。
      */
-    public record Values(int radiusChunks,
+    public record Values(boolean enabled,
+                         int radiusChunks,
                          double cooldownSeconds,
                          int blocksPerTick,
                          int maxSwapBlocks,
@@ -262,8 +289,18 @@ public final class ShuffleConfig {
         return values;
     }
 
+    /**
+     * 运行时切换总开关：写入配置文件并立即刷新快照，
+     * 因此指令一次调用就生效，不必等文件监听触发的重载。
+     */
+    public static void setEnabled(boolean enabled) {
+        ENABLED.set(enabled);
+        reload();
+        Blockshuffle.LOGGER.info("[BlockShuffle] 总开关已{}", enabled ? "开启" : "关闭");
+    }
+
     private static Values defaults() {
-        return new Values(6, 5.0D, 6000, 500000, 8, true, true, false,
+        return new Values(true, 6, 5.0D, 6000, 500000, 8, true, true, false,
                 Set.of(), true, new Object2DoubleOpenHashMap<>(), new Object2DoubleOpenHashMap<>(),
                 Set.of(), 100, 15.0D,
                 MessageMode.CHAT, MessageScope.REGION);
@@ -353,6 +390,7 @@ public final class ShuffleConfig {
         }
 
         values = new Values(
+                ENABLED.get(),
                 RADIUS_CHUNKS.get(),
                 COOLDOWN_SECONDS.get(),
                 BLOCKS_PER_TICK.get(),

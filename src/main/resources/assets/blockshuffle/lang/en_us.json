@@ -50,6 +50,11 @@
   "blockshuffle.message.skipped": "[BlockShuffle] Swap skipped: %s",
   "blockshuffle.command.triggered": "[BlockShuffle] Force-triggered one swap.",
   "blockshuffle.message.welcome.title": "[BlockShuffle] Every time a player is hurt, two nearby block types swap!",
-  "blockshuffle.message.welcome.help": "The swapped blocks are shown on screen / in chat when you get hurt. Use /blockshuffle status for settings and /blockshuffle trigger to test manually.",
-  "blockshuffle.message.welcome.author": "Author: Mengy    Contact: 2274473985@qq.com"
+  "blockshuffle.message.welcome.help": "The swapped blocks are shown on screen / in chat when you get hurt. Use /blockshuffle status for settings, /blockshuffle trigger to test manually, /blockshuffle off to disable.",
+  "blockshuffle.message.welcome.author": "Author: Mengy    Contact: 2274473985@qq.com",
+  "blockshuffle.configuration.enabled": "Enabled",
+  "blockshuffle.configuration.enabled.tooltip": "Master switch. When off: damage no longer triggers a swap, manual triggers are ignored, and any swap in progress is aborted. Use /blockshuffle off and /blockshuffle on in game (this writes to this config file).",
+  "blockshuffle.command.enabled": "[BlockShuffle] Enabled",
+  "blockshuffle.command.disabled": "[BlockShuffle] Disabled (any swap in progress was aborted)",
+  "blockshuffle.message.disabled": "[BlockShuffle] The mod is currently disabled; use /blockshuffle on to enable it"
 }

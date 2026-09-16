@@ -40,7 +40,7 @@ public final class WelcomeMessage {
                         .withStyle(ChatFormatting.GOLD),
                 Component.translatableWithFallback(
                         "blockshuffle.message.welcome.help",
-                        "受伤后屏幕/聊天栏会提示换掉了什么；/blockshuffle status 查看设置，/blockshuffle trigger 手动触发测试。"),
+                        "受伤后屏幕/聊天栏会提示换掉了什么；/blockshuffle status 查看设置，/blockshuffle trigger 手动触发测试，/blockshuffle off 一键关闭。"),
                 Component.translatableWithFallback(
                                 "blockshuffle.message.welcome.author",
                                 "作者：Mengy    联系：2274473985@qq.com")

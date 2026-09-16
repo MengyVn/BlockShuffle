@@ -3,6 +3,7 @@ package MengySmod.blockshuffle.shuffle;
 import MengySmod.blockshuffle.Blockshuffle;
 import MengySmod.blockshuffle.config.ShuffleConfig;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -64,6 +65,9 @@ public final class ShuffleManager {
         if (player.isCreative() || player.isSpectator()) {
             return;
         }
+        if (!ShuffleConfig.get().enabled()) {
+            return;
+        }
         request(player, false);
     }
 
@@ -71,6 +75,18 @@ public final class ShuffleManager {
     public static void onServerTick(ServerTickEvent.Post event) {
         MinecraftServer server = event.getServer();
         DropLimiter.tick(server);
+
+        // 总开关关闭：不再接受新任务，并中止进行中的互换（已经换掉的部分无法回滚）
+        if (!ShuffleConfig.get().enabled()) {
+            if (active != null) {
+                Blockshuffle.LOGGER.info("[BlockShuffle] 总开关已关闭，中止进行中的互换");
+                active = null;
+            }
+            if (!QUEUE.isEmpty()) {
+                QUEUE.clear();
+            }
+            return;
+        }
 
         if (active == null) {
             Request request = pollValidRequest(server);
@@ -102,14 +118,37 @@ public final class ShuffleManager {
         enqueue(player.serverLevel(), player.blockPosition().immutable(), player.getUUID(), ignoreCooldown);
     }
 
-    /** 指令手动触发（玩家执行），忽略冷却，便于测试。 */
-    public static void forceTrigger(ServerPlayer player) {
+    /**
+     * 指令手动触发（玩家执行），忽略冷却，便于测试。
+     *
+     * @return true 表示请求已被接受；false 表示模组总开关处于关闭状态
+     */
+    public static boolean forceTrigger(ServerPlayer player) {
+        if (!ShuffleConfig.get().enabled()) {
+            player.displayClientMessage(Component.translatableWithFallback(
+                    "blockshuffle.message.disabled",
+                    "[BlockShuffle] 模组当前已关闭，可用 /blockshuffle on 开启"), true);
+            return false;
+        }
         request(player, true);
+        return true;
     }
 
     /** 指令手动触发（控制台执行），忽略冷却与玩家校验。 */
-    public static void forceTrigger(ServerLevel level, BlockPos center) {
+    public static boolean forceTrigger(ServerLevel level, BlockPos center) {
+        if (!ShuffleConfig.get().enabled()) {
+            Blockshuffle.LOGGER.info("[BlockShuffle] 模组已关闭，忽略手动触发");
+            return false;
+        }
         enqueue(level, center.immutable(), null, true);
+        return true;
+    }
+
+    /** 一键开关（供指令调用），会写入配置文件并立即生效。 */
+    public static boolean toggleEnabled() {
+        boolean next = !ShuffleConfig.get().enabled();
+        ShuffleConfig.setEnabled(next);
+        return next;
     }
 
     private static void enqueue(ServerLevel level, BlockPos center, @Nullable UUID playerId, boolean ignoreCooldown) {
@@ -162,6 +201,7 @@ public final class ShuffleManager {
         ShuffleConfig.Values values = ShuffleConfig.get();
         StringBuilder builder = new StringBuilder();
         builder.append("BlockShuffle 状态\n");
+        builder.append("总开关: ").append(values.enabled() ? "开启" : "已关闭").append('\n');
         builder.append("半径: ").append(values.radiusChunks()).append(" 区块（正方形区域）\n");
         builder.append("冷却: ").append(values.cooldownSeconds()).append(" 秒\n");
         builder.append("每 tick 预算: ").append(values.blocksPerTick()).append(" 格\n");
@@ -196,7 +236,8 @@ public final class ShuffleManager {
                 .append(" / ").append(values.messageScope().name()).append('\n');
         builder.append("累计互换次数: ").append(totalShuffles).append('\n');
         builder.append("当前任务: ").append(active != null ? "进行中" : "空闲").append('\n');
-        builder.append("上次结果: ").append(lastSummary);
+        builder.append("上次结果: ").append(lastSummary).append('\n');
+        builder.append("说明: 生效的是本服务端（房主）的配置；其他玩家改自己的配置只影响他们自己开的世界。");
         return builder.toString();
     }
 
